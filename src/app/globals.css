@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --red: #d91921;
+  --red-disabled: #d9191f75;
+  --black: #1f1313;
+  --gray: #E1E1E1;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif !important;
+}
+
+::-webkit-scrollbar{
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb{
+  background-color: var(--red);
+}
+
+::-webkit-scrollbar-track{
+  background-color: var(--red-disabled);
+}
+
+/* ================ loader ===============  */
+
+.loader {
+  width: 35px;
+  height: 35px;
+  border: 5px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+.red-loader {
+  width: 35px;
+  height: 35px;
+  border: 5px solid var(--red);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+.rdrDateDisplayWrapper{
+  display: none !important;
+}
+
+.rdrStartEdge,.rdrDayActive{
+
+  color: #D71A21 !important;
+
+}
+
+.rdrDayNumber{
+  color: #D71A21 !important;
+}
+
+
+
+/* sliderStyles.css */
+/* The overall slider track container */
+.slider {
+  width: 100%;
+  height: 10px; /* Make the entire track height the same */
+  background: #ededed; /* This is the grey background */
+  border-radius: 4px;
+  position: relative;
+  padding: 0;
+}
+
+/* The unfilled track before and after the thumbs */
+.track-unfilled {
+  background: #ededed; /* Grey background */
+  height: 100%; /* Matches the overall track height */
+  border-radius: 4px;
+  position: absolute;
+  top: 0;
+}
+
+/* The filled track between the two thumbs */
+.track-filled {
+  background: #d71a21; /* Red filled part */
+  height: 100%; /* Same height as the unfilled part */
+  border-radius: 4px;
+  position: absolute;
+  top: 0;
+}
+
+/* Thumb styling */
+.thumb {
+  width: 20px; /* Adjust the thumb width */
+  height: 20px; /* Adjust the thumb height */
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  top: -5px; /* Center the thumb vertically relative to the track */
+  z-index: 10;
+}
+
+.thumb:hover {
+  background: #c00;
+}
+
+
+.rdrCalendarWrapper,.rdrMonth{
+  width: 100% !important;
+}
+
+.loadergoogle {
+  width: 20px;
+  height: 20px;
+  border: 5px solid gray;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+.small-loader {
+  width: 25px;
+  height: 25px;
+  border: 5px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* src/components/LoadingSpinner.module.css */
+.loader2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.8); /* Optional background */
+}
+
+.spinner2 {
+  border: 8px solid #f3f3f3; /* Light grey */
+  border-top: 8px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media screen and (max-width: 1445px) {
+  .new-customer-table{
+    width: 83vw;
+  }
+}
+
+@media screen and (max-width: 1330px) {
+  .new-customer-table{
+    width: 81vw;
+  }
+}
+
+@media screen and (max-width: 1155px) {
+  .new-customer-table{
+    width: 79vw;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .new-customer-table{
+    width: 81vw;
+  }
+}
+
+@media screen and (max-width: 905px) {
+  .new-customer-table{
+    width: 79.5vw;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .new-customer-table{
+    width: 87.5vw;
+  }
+}
+
+@media screen and (max-width: 606px) {
+  .new-customer-table{
+    width: 85.5vw;
+  }
+}
+
+@media screen and (max-width: 521px) {
+  .new-customer-table{
+    width: 86vw;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  .new-customer-table{
+    width: 83vw;
+  }
+}
+
+@media screen and (max-width: 353px) {
+  .new-customer-table{
+    width: 81vw;
+  }
+}
+
+@media screen and (max-width: 296px) {
+  .new-customer-table{
+    width: 77vw;
+  }
+}
+
+.sorting-modal-content .ant-picker.custom-date-picker {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.sorting-modal-content .ant-picker.custom-date-picker input {
+  background-color: transparent;
+}
+
+:where(.css-dev-only-do-not-override-qnu6hi).ant-picker-outlined:hover{
+  border-color: var(--red-disabled);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+:where(.css-dev-only-do-not-override-qnu6hi).ant-picker-outlined:focus, :where(.css-dev-only-do-not-override-qnu6hi).ant-picker-outlined:focus-within{
+  border-color: var(--red-disabled);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.ant-picker-cell-in-view.ant-picker-cell{
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner {
+  background-color: var(--red) !important;
+  border-radius: 20px;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner:hover {
+  background-color: var(--red) !important;
+  border-radius: 20px;
+}
+
+.ant-picker-header-view button {
+  color: var(--red) !important;
+}
+
+.ant-picker-header-view button:hover {
+  color: var(--red) !important;
+}
+
+.ant-picker-header button {
+  color: var(--red);
+}
+
+.ant-picker-header button:hover {
+  color: var(--red);
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
+  border-color: var(--red) !important;
+}
+
+:where(.css-dev-only-do-not-override-qnu6hi).ant-modal .ant-modal-content{
+  padding: 0px !important;
+}

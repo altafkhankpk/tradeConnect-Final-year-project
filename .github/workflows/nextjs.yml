@@ -1,0 +1,49 @@
+name: Deploy to Ubuntu Server (Development Mode)
+
+on:
+  push:
+    branches:
+      - CompleteProject
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the latest version of the code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Install SSH Key
+      - name: Install SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Step 3: Deploy the application on the remote server
+      - name: Deploy to Ubuntu Server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@167.71.81.153 << 'EOF'
+            echo "Connecting to server..."
+            
+            export NVM_DIR="$HOME/.nvm"  
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            export PATH=$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+            cd /var/drop-agent-front-complete || exit 1
+            echo "Pulling latest code..."
+            git fetch origin CompleteProject
+            git reset --hard origin/CompleteProject
+
+            echo "Installing dependencies..."
+            npm cache clean --force
+            npm install
+
+            echo "Stopping and restarting the application..."
+            npm run build
+            pm2 stop drop-agent-front-complete || true
+            pm2 delete drop-agent-front-complete || true
+            pm2 start "npm run start -- -p 3001" --name "drop-agent-front-complete"
+          EOF
