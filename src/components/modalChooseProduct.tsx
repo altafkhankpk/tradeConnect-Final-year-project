@@ -94,6 +94,13 @@ const ModalChooseProduct = ({
       }
       const response = (await uploadProductApi(formData)) as Product;
 
+
+      // const response =  axios.post("/api/uploadProduct", formData, {
+      //   headers: {  
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // });
+
       console.log(response);
 
       if (response?.data?.status === "ok") {

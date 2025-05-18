@@ -417,7 +417,7 @@ function Chat() {
         if (reset) {
           setAgnetToShow([]); // Clear the current agents list before fetching new data
         }
-        axios.get(`${API_URL}/apis/chat/getAllUserChat`, {
+        axios.get(`${API_URL}/apis/user/getAll`, {
           params: {
             page: page,
             limit: 5
@@ -426,18 +426,22 @@ function Chat() {
             Authorization: `Bearer ${token}` // Include the token here
           }
         }).then(function (resp) {
+          console.log("///......dddddddddsssss")
+          console.log(resp.data.data)
+          setAgnetToShow(resp.data.data)
           
 
-          const sortedData = resp.data.data.sort((a: UserType, b: UserType) => {
-            const timeA = new Date(a.data.updatedAt).getTime();
-            const timeB = new Date(b.data.updatedAt).getTime();
-            return timeB - timeA;  // Sort in descending order (most recent first)
-          });
+          // const sortedData = resp.data.data.sort((a: UserType, b: UserType) => {
+          //   const timeA = new Date(a.data.updatedAt).getTime();
+          //   const timeB = new Date(b.data.updatedAt).getTime();
+          //   return timeB - timeA;  // Sort in descending order (most recent first)
+          // });
 
-          // Debugging sorted data
-          sortedData.forEach((item: UserType) => {
-            console.log("Sorted updatedAt:", item.data.updatedAt);
-          });
+          // // Debugging sorted data
+          // sortedData.forEach((item: UserType) => {
+          //   console.log("Sorted updatedAt:", item.data.updatedAt);
+          // });
+          // console.log(sortedData)
 
           // Set sorted data to state
           // setAgnetToShow(sortedData);
@@ -445,15 +449,15 @@ function Chat() {
           // Set the sorted array to usersToShow
           // setUsersToShow(resp.data.data);
           // setActiveButton('agents');
-          if (reset) {
-            const fresh = [...sortedData];
-            setAgnetToShow(fresh);
-            c(sortedData)
-          } else {
-            const fresh = [...agentToShow, ...sortedData];
-            setAgnetToShow(fresh);
-            c(fresh)
-          }
+          // if (reset) {
+          //   const fresh = [...sortedData];
+          //   setAgnetToShow(fresh);
+          //   c(sortedData)
+          // } else {
+          //   const fresh = [...agentToShow, ...sortedData];
+          //   setAgnetToShow(fresh);
+          //   c(fresh)
+          // }
         });
       } catch (error) {
         console.error('Error fetching active agent last chat:', error);
@@ -965,7 +969,7 @@ function Chat() {
 
                       {agentToShow
                         
-                        .filter((user) => user.data.userId.username.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
+                        // .filter((user) => user.data.userId.username.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
                         .map((user) => {
                           dispatch(setChatOpen(false))
                           // const messages = userMessages.filter(
@@ -987,11 +991,11 @@ function Chat() {
                               onClick={() => handleUserClick(user, 1, true)}
                             >
                               <div className="flex relative">
-                                <img className="w-10 h-10 rounded-full mr-4" src={user.data.userId.profileImage} alt={`${user.username}'s profile`} />
+                                <img className="w-10 h-10 rounded-full mr-4" src={user.profileImage} alt={`${user.username}'s profile`} />
                                 <div className="items-center flex-1">
                                   <div>
                                     <div className="flex pb-3 justify-between items-center">
-                                      <h2 className="text-lg font-bold">{user.data.userId.username}</h2>
+                                      <h2 className="text-lg font-bold">{user.username}</h2>
                                       {/* <div className="text-xs ms-2">Minimum Daily Order Requirement: { }</div>   */}
                                     </div>
                                     <div className="flex justify-between">
@@ -999,15 +1003,15 @@ function Chat() {
                                       <>
                                         <p className="text-sm">
                                           {/* Show the last message or a placeholder if no message exists */}
-                                          {user.data.message
+                                          {/* {user.data.message
                                             ? user.data.message.length > 20
                                               ? `${user.data.message.slice(0, 20)}...`
                                               : user.data.message
                                             : "No messages yet."
-                                          }
+                                          } */}
                                         </p>
                                       </>
-                                      <span className="text-sm text-gray-500">{getLastSeenTime(user.data.updatedAt)}</span>
+                                      {/* <span className="text-sm text-gray-500">{getLastSeenTime(user.updatedAt)}</span> */}
                                     </div>
                                     {/* Unread Message Count */}
                                     {user.unseen > 0 && (

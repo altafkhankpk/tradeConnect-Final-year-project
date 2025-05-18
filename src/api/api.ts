@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { IoConstructOutline } from "react-icons/io5";
 
 interface FilterData {
   page?: number | string | null;
@@ -274,6 +275,8 @@ export const updateAgentFormdApi = async (value: FormData) => {
 };
 
 export const updateDropshipperApi = async (value: FormData) => {
+  console.log("..........................")
+  console.log(value)
   const cookies = Cookies.get("access");
   const config = {
     headers: {

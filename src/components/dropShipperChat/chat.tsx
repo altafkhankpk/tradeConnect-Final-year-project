@@ -336,7 +336,7 @@ function Chat() {
                 if (reset) {
                     setAgentToShow([]); // Clear the current agents list before fetching new data
                 }
-                const response = await axios.get(`${API_URL}/apis/chat/getAllAgentLastChat`, {
+                const response = await axios.get(`${API_URL}/apis/agent/getAll`, {
                     params: {
                         page: page,
                         limit: 10
@@ -348,33 +348,34 @@ function Chat() {
                 console.log("All agent chats with last message successful");
                 const agentsWithLastMessage = response.data.data; // Assuming this is an array
                 console.log(agentsWithLastMessage);
+                setAUsersToShow(agentsWithLastMessage)
 
 
                 // Extract the 'agent' field from each item in the array and map it to UserType
-                const agents: UserType[] = agentsWithLastMessage.map((item: UserType) => ({
-                    _id: item.agent._id, // Assuming agent has _id
-                    username: item.agent.username, // Assuming agent has username
-                    lastSeen: item.agent.lastSeen, // Assuming agent has lastSeen
-                    profileImage: item.agent.profileImage, // Assuming agent has profileImage
-                    lastMessage: item.lastMessage ? item.lastMessage : 'No message', // Get last message from item
-                    // Convert lastMessageTime to Date object or fallback to a very old date
-                    lastMessageTime: item.lastMessageTime ? new Date(item.lastMessageTime) : new Date(0),
-                    unseen: item.unseen || 0,
-                }));
-                const sortedAgents = agents.sort((a, b) => {
-                    return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
-                });
+                // const agents: UserType[] = agentsWithLastMessage.map((item: UserType) => ({
+                //     _id: item.agent._id, // Assuming agent has _id
+                //     username: item.agent.username, // Assuming agent has username
+                //     lastSeen: item.agent.lastSeen, // Assuming agent has lastSeen
+                //     profileImage: item.agent.profileImage, // Assuming agent has profileImage
+                //     lastMessage: item.lastMessage ? item.lastMessage : 'No message', // Get last message from item
+                //     // Convert lastMessageTime to Date object or fallback to a very old date
+                //     lastMessageTime: item.lastMessageTime ? new Date(item.lastMessageTime) : new Date(0),
+                //     unseen: item.unseen || 0,
+                // }));
+                // const sortedAgents = agents.sort((a, b) => {
+                //     return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
+                // });
 
                 // Set the sorted agents to `AgentToShow`
-                if (reset) {
-                    const fresh = [...sortedAgents];
-                    setAUsersToShow(fresh);
-                    c(sortedAgents)
-                } else {
-                    const fresh = [...usersToShow, ...sortedAgents];
-                    setAUsersToShow(fresh);
-                    c(fresh)
-                }
+                // if (reset) {
+                //     const fresh = [...sortedAgents];
+                //     setAUsersToShow(fresh);
+                //     c(sortedAgents)
+                // } else {
+                //     const fresh = [...usersToShow, ...sortedAgents];
+                //     setAUsersToShow(fresh);
+                //     c(fresh)
+                // }
 
             } catch (error) {
                 console.error('Error fetching all agents last chat:', error);
@@ -452,7 +453,7 @@ function Chat() {
         console.log(userId);
         setSeletedAgent(agent)
 
-        axios.get(`${API_URL}/apis/chat/getMarkAgentChat`,
+        axios.get(`${API_URL}/apis/chat/getAgentChat`,
             {
                 params: {
                     agentId: agent._id,//this i agent id 

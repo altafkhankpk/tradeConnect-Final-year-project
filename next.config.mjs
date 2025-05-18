@@ -1,8 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-        domains: ['167.71.81.153', 'api.dropagenthub.com'],
-      }
+  experimental: {
+    instrumentationHook: true, // ✅ use "instrumentationHook" (singular)
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'karim-next-2.s3.amazonaws.com',
+        pathname: '/**', // Allow all paths
+      },
+    ],
+  },
 };
 
 export default nextConfig;
+
