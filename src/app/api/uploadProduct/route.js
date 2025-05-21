@@ -56,7 +56,7 @@ import { v4 as uuidv4 } from "uuid";
       console.log("File nameddddddddddddddddddddddddddddddddddddddddddd:",  )
       console.log(formData)
           
-      const imageUrl = `https://karim-next-2.s3.amazonaws.com/${fileName}`;
+      const imageUrl = `https://altaf-next-1.s3.amazonaws.com/${fileName}`;
       console.log("Image URL:", imageUrl);
       console.log("formdata",formData)
       

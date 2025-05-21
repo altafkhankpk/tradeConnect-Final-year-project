@@ -7,7 +7,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'karim-next-2.s3.amazonaws.com',
+        hostname: 'altaf-next-1.s3.amazonaws.com',
         pathname: '/**', // Allow all paths
       },
     ],

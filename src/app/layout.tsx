@@ -16,8 +16,8 @@ const geistMono = localFont({
   weight: "100 900",
 });
 export const metadata: Metadata = {
-  title: "Drop Agent Hub",
-  description: "Drop Agent Hub",
+  title: "TradeConnect",
+  description: "TradeConnect",
 };
 export default function RootLayout({
   children,

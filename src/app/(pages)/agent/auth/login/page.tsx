@@ -249,11 +249,11 @@ const AgentLogin = () => {
       <div className="flex flex-col lg:flex-row px-[20px] py-[20px] gap-[50px] lg:gap-[15px] max-w-[1400px]">
         {/* left-box */}
         <div className="flex-1 xl:ps-[30px] lg:border-r pe-[20px] flex flex-col items-center lg:items-start">
-          <Image
+          {/* <Image
             alt="logo"
             src={logon}
             className="h-[95px] object-contain w-[max-content]"
-          />
+          /> */}
           <p className="text-[30px] sm:text-[40px] font-[600] leading-[35px] sm:leading-[50px] max-w-[500px] mt-[15px] text-center lg:text-start">
             Get better prices for free and{" "}
             <i className="font-[800]">scale your business</i>

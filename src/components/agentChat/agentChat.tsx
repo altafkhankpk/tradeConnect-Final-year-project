@@ -42,8 +42,8 @@ interface UserType {
     _id: string
   }
   sendBy: string;
+  message: string;
   data: {
-    message: string;
     updatedAt: string;
     userId: {
       lastMessageTime: string;
@@ -562,14 +562,14 @@ function Chat() {
     // Create a new object that keeps the structure of AgentType
     const newSelectedUser: AgentType = {
       ...user, // Keep the other properties
-      data: {
-        ...user.data, // Keep the other properties inside data
-        userId: { ...user.data.userId } // Ensure we preserve the existing userId structure
-      }
+      // data: {
+      //   ...user.data, // Keep the other properties inside data
+      //   userId: { ...user.data.userId } // Ensure we preserve the existing userId structure
+      // }
     };
     // Set the selected user with the full structure
     setSelectedUser(newSelectedUser);
-    const userId = user.data.userId._id; // Extract userId for API call
+    const userId = user._id; // Extract userId for API call
     
     axios
       .get(`${API_URL}/apis/chat/getMarkUserChat?`, {
@@ -742,7 +742,7 @@ function Chat() {
           if (index > -1) {
             // Remove the user from the list
             const tempUser = usersToShow[index];
-            tempUser.data.message = messageToSend;
+            tempUser.message = messageToSend;
             usersToShow.splice(index, 1);
             // Add the user to the top of the list
             usersToShow.unshift(tempUser);
@@ -751,11 +751,11 @@ function Chat() {
             // setAgent([...usersToShow]);
           }
         } else if (activeButton === "agents") {
-          const index = agentToShow.findIndex((user: UserType) => user.data.userId._id === selectedUser?.data.userId._id);
+          const index = agentToShow.findIndex((user: UserType) => user._id === selectedUser?._id);
           if (index > -1) {
             // Remove the user from the list
             const tempUser = agentToShow[index];
-            tempUser.data.message = messageToSend;
+            tempUser.message = messageToSend;
             agentToShow.splice(index, 1);
             // Add the user to the top of the list
             agentToShow.unshift(tempUser);
@@ -816,7 +816,7 @@ function Chat() {
                     scrollToBottom();
 
       event.preventDefault(); // Prevent default behavior of Enter (e.g., new line)
-      sendMessage(inputValue, selectedUser ? selectedUser.data.userId._id : "", null); // Call your sendMessage function
+      sendMessage(inputValue, selectedUser ? selectedUser._id : "", null); // Call your sendMessage function
       setInputValue(""); // Clear the input after sending
     }
   }
@@ -1165,7 +1165,7 @@ function Chat() {
                   <div className="flex items-center ">
                     <div className="border-r border-gray-300 pr-2">
                       {/* <span className="font-bold ">{selectedUser._id}</span> */}
-                      <span><b>{selectedUser?.data.userId.username}</b></span>
+                      <span><b>{selectedUser?.username}</b></span>
                       {/* <p className="text-sm text-gray-400">Last seen: {userLastSeen[selectedUser._id]}</p> */}
                       <p className="text-sm text-gray-400" style={{ fontSize: "11px" }}>
                         Last seen: {selectedUser.lastSeen ? new Date(selectedUser.lastSeen).toLocaleString() : "Unavailable"}
@@ -1179,7 +1179,7 @@ function Chat() {
                                     > */}
                   {/* Toggle color based on 'isInterested' */}
                   <i
-                    onClick={() => handleTagClick(selectedUser.data.userId._id)}
+                    onClick={() => handleTagClick(selectedUser._id)}
                     // onClick={handleTagClick}
 
                     className={`fa-${isInterested ? 'solid' : 'regular'} fa-bookmark ${isInterested ? 'text-red-500' : ''
@@ -1335,7 +1335,7 @@ sendMessage("______", selectedUser?.data.userId._id);
                 />
 
                 <button className="ml-2 rounded-lg" onClick={() => {
-                  sendMessage("______", selectedUser?.data.userId._id, null);
+                  sendMessage("______", selectedUser?._id, null);
                   scrollToBottom();
 
                 }}>Send</button>
