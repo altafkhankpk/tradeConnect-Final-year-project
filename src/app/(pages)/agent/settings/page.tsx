@@ -182,6 +182,35 @@ const Settings = () => {
       setLoader(false);
     }
   };
+   const fn_deleteAccount = async () => {
+    try {
+      const token = Cookies.get("agentAccess");// or however you're storing the JWT
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_REACT_APP_BASEURL}/apis/agent/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Add JWT token to the header
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Account deleted successfully.");
+        // Optionally, log the user out and redirect
+        localStorage.removeItem("token");
+        Cookies.remove("agentAccess");
+        Cookies.remove("refresh");
+        window.location.href = "/agent/auth/login"; // or navigate using react-router
+      } else {
+        toast.error(`Failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error("An error occurred while deleting the account.");
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -603,8 +632,15 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
+              
 
-              <div className="flex justify-end mt-6">
+              <div className="flex justify-between mt-6">
+                 <button
+                  onClick={fn_deleteAccount}
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md"
+                >
+                  Delete Account
+                </button>
                 <button
                   disabled={loader}
                   onClick={handleSubmit}
@@ -676,7 +712,7 @@ const Settings = () => {
                       <p>Profile</p>
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={() => setActiveTab("invoices")}
                       className={`px-5 h-[40px] sm:h-[45px] flex items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${
                         activeTab === "invoices"
@@ -685,7 +721,7 @@ const Settings = () => {
                       }`}
                     >
                       <p>Invoices</p>
-                    </button>
+                    </button> */}
 
                     <button
                       onClick={() => setActiveTab("bank")}

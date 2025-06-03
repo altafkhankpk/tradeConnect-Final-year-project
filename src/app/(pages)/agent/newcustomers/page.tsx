@@ -234,12 +234,12 @@ const NewCustomers = () => {
                 </button>
               </div>
               {/* double arrow */}
-              <div
+              {/* <div
                 className="cursor-pointer mt-[15px]"
                 onClick={() => setFilterModal(true)}
               >
-                <Image src={Swap} alt="" width={35} height={35} />
-              </div>
+                {/* <Image src={Swap} alt="" width={35} height={35} /> */}
+              {/* </div> */}
             </div>
 
             <div
@@ -268,9 +268,7 @@ const NewCustomers = () => {
                       <th scope="col" className="text-sm  font-bold px-6 py-4">
                         Upload a Quote
                       </th>
-                      <th scope="col" className="text-sm  font-bold px-6 py-4">
-                        DM
-                      </th>
+                      
                       <th
                         scope="col"
                         className="text-sm  font-bold px-6 py-4"
@@ -328,15 +326,15 @@ const NewCustomers = () => {
                             </button>
                           </td>
                           <td className="font-[400] text-[14px]">
-                            <button
+                            {/* <button
                               className="h-[30px] bg-[#D71A21] w-[max-content] mx-auto text-white font-[400] rounded-[10px] flex justify-center items-center px-[13px]"
                               onClick={() => {
                                 dispatch(setKeForMessage(true))
                                 router.push(`/agent/chat?productId=${item._id}&userId=${item.userId._id}`)
                               }}
                             >
-                              Reach Out
-                            </button>
+                              Reach Outdfdfdf
+                            </button> */}
                           </td>
                           <td className="align-middle text-sm text-center font-normal px-6 py-1.5">
                             <div className="flex flex-col gap-1">

@@ -15,9 +15,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 const API_URL = process.env.NEXT_PUBLIC_REACT_APP_BASEURL;
 // Load Stripe with your publishable key
-const stripePromise = loadStripe(
-  "pk_live_51PgMY72L1r125aFrc4q16BQAc3pPhSJnAlVKAxn5sLy4D4sqAUbfZNqgNrro4saob2nE2MWZvgro1jMlYAxU5iuX00xAqUhHxz"
-);
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 const userToken = Cookies.get("access");
 
 // interface PaymentPageProps {
@@ -71,7 +69,7 @@ export default function PaymentPage() {
 
     if (finalAmount) {
       // Ensure the paymentIntentAmount is rounded to 2 decimal places
-      let paymentIntentAmount: number = parseFloat(finalAmount.toFixed(2));
+      let paymentIntentAmount: number = parseFloat(finalAmount.toFixed(1));
       setUserAmount(paymentIntentAmount);
       // Multiply by 100 to convert to cents for Stripe
       paymentIntentAmount = Number((paymentIntentAmount * 100).toFixed(2));
@@ -105,7 +103,7 @@ export default function PaymentPage() {
       <div className="md:min-h-[100vh] flex flex-col justify-center items-center mt-[70px] md:mt-0 relative bg-white md:bg-gray-100">
         <div className="absolute flex justify-center items-center top-[-40px] md:top-[80px] left-[5%] xl:left-[10%]">
           <FaArrowLeft className="text-gray-400 cursor-pointer" onClick={() => router.push("/products")} />
-          <span className="inline-block ms-[10px] text-gray-400 font-[500]">Drop Agent Hub</span>
+          {/* <span className="inline-block ms-[10px] text-gray-400 font-[500]">Drop Agent</span> */}
         </div>
         <p className="text-[14px] md:text-[16px] font-[500] text-gray-400 w-[95%] sm:w-[90%] xl:w-[80%]">Sub Total</p>
         <div className="bg-white md:bg-gray-100 w-[97%] sm:w-[88%] px-[1%] md:px-0 rounded-[6px] md:w-[90%] xl:w-[80%] md:mb-10 flex items-center justify-between z-[999]">
@@ -263,7 +261,8 @@ function CheckoutForm({
       },
     };
     const data = {
-      agentId: agentId,
+      agentId: "cus_SNqFfHvHj1PDwx",
+      email: "love@gmail.com",
       totalAmount: amount,
       userAmount: userAmount,
       paymentIntentId: paymentIntent,
@@ -285,7 +284,7 @@ function CheckoutForm({
         confirmParams: {
           return_url: `${window.location.origin}/payment-success`, // Optional success URL
         },
-        redirect: "if_required", // Prevent automatic redirects for testing purposes
+        redirect: "always", // Prevent automatic redirects for testing purposes
       });
 
       setLoading(false);

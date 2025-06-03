@@ -315,11 +315,11 @@ const Register = () => {
                   {Formik.errors.phone}
                 </p>
               )}
-              <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
+              {/* <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
                 <p className="text-gray-300">Or continue with</p>
                 <hr className="flex-1 mt-[2px]" />
-              </div>
-              <div className="flex gap-[13px] items-center">
+              </div> */}
+              {/* <div className="flex gap-[13px] items-center">
                 <div
                   onClick={handleGoogleSignin}
                   className="h-[50px] flex px-4  gap-2 border rounded-2xl items-center cursor-pointer"
@@ -331,7 +331,7 @@ const Register = () => {
 
                   {googleLoader ? <span className="loadergoogle"></span> : null}
                 </div>
-              </div>
+              </div> */}
               <div className="flex sm:min-w-[500px] sm:max-w-[530px] mt-[10px]">
                 <button
                   type="submit"

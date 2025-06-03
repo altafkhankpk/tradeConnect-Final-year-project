@@ -307,18 +307,18 @@ const AgentLogin = () => {
               </p>
             )}
             <p className="text-[13px] text-[#5C5C5C] mt-[-20px] w-full text-end sm:min-w-[500px] max-w-[450px] cursor-pointer">
-              <Link
+              {/* <Link
                 href={"/agent/auth/forget-password"}
                 className="hover:underline"
               >
                 Forgot your password?
-              </Link>
+              </Link> */}
             </p>
-            <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
+            {/* <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
               <p className="text-gray-300">Or continue with</p>
               <hr className="flex-1 mt-[2px]" />
-            </div>
-            <div className="flex gap-[13px] items-center">
+            </div> */}
+            {/* <div className="flex gap-[13px] items-center">
               <Image
                 alt="google"
                 src={google}
@@ -326,7 +326,7 @@ const AgentLogin = () => {
                 className="h-[50px] object-contain cursor-pointer w-[max-content]"
               />
               {googleLoader ? <span className="loadergoogle"></span> : null}
-            </div>
+            </div> */}
             <div className="flex sm:min-w-[500px] sm:max-w-[530px] mt-[10px]">
               <button
                 type="submit"

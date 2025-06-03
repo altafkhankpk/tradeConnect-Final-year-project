@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import io from 'socket.io-client';
 import { Provider, useDispatch } from "react-redux";
 import { store } from "@/store/store";
- 
+
 
 
 
@@ -22,7 +22,7 @@ import PricMessage from "../ChatComponents/PriceMessageUI";
 
 const token = Cookies.get("agentAccess");
 const API_URL = process.env.NEXT_PUBLIC_REACT_APP_BASEURL;
-const SOCKET_URL=process.env.NEXT_PUBLIC_SOCKET_BASEURL;
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_BASEURL;
 // 167.71.81.153:8000
 const socket = io(`${SOCKET_URL}/apis/agent`, {
   'transports': ['websocket'],
@@ -33,8 +33,10 @@ const socket = io(`${SOCKET_URL}/apis/agent`, {
 });
 
 
- 
 
+type SocketCallBack = {
+  success: boolean
+};
 
 // let userId = localStorage.getItem("userId")
 interface UserType {
@@ -63,7 +65,7 @@ interface UserType {
 }
 
 
- 
+
 
 type AgentType = {
   data: {
@@ -94,13 +96,13 @@ interface UserData {
   email: string;
   // Add other fields as necessary
 };
- 
+
 interface Item extends HTMLDivElement {
   clientHeight: number;      // Number type for clientHeight
-    scrollTop: number;         // Number type for scrollTop
-    scrollHeight: number;      // Number type for scrollHeight
-    current: object;           // Use 'object' if 'current' is any non-null object
-    onscroll: (event: Event) => void;  // Correctly type onscroll
+  scrollTop: number;         // Number type for scrollTop
+  scrollHeight: number;      // Number type for scrollHeight
+  current: object;           // Use 'object' if 'current' is any non-null object
+  onscroll: (event: Event) => void;  // Correctly type onscroll
 }
 // types.ts (or at the top of chat.tsx)
 export interface Message {
@@ -144,11 +146,11 @@ function Chat() {
   const [file, setFile] = useState<File | null>(null);
   // const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [activeButton, setActiveButton] = useState('agents');
-  
+
   const [usersToShow, setUsersToShow] = useState<UserType[]>([]); // Default to UserType[]
   const [agentToShow, setAgnetToShow] = useState<UserType[]>([]); // Default to UserType[]
   const [userMessages, setUserMessages] = useState<Message[]>([]);
-  
+
   const searchParams = useSearchParams(); // Use the new hook to get search parameters
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch();
@@ -182,7 +184,7 @@ function Chat() {
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     data.type = "priceMessage";
-    sendMessage("", selectedUser ? selectedUser.data.userId._id : "", data);
+    sendMessage("", selectedUser ? selectedUser._id : "", data);
     toggleModal();  // Close modal after submission
     reset()
   };
@@ -200,7 +202,7 @@ function Chat() {
 
   }
   const userScroll = () => {
-    const bottom = (rightContainer.current?.scrollHeight|| 0) === (rightContainer.current?.scrollTop || 0) + (rightContainer.current?.clientHeight || 0);
+    const bottom = (rightContainer.current?.scrollHeight || 0) === (rightContainer.current?.scrollTop || 0) + (rightContainer.current?.clientHeight || 0);
 
     if (bottom) {
       setpage2((prev) => prev + 1); // Load next page2
@@ -211,9 +213,9 @@ function Chat() {
     const atTop = messScrollContainer.current?.scrollTop === 0;
 
     if (atTop) {
-     
-      setpage3((prev) => prev + 1);  
-      
+
+      setpage3((prev) => prev + 1);
+
     }
   };
   useEffect(() => {
@@ -239,7 +241,7 @@ function Chat() {
   const handleTagClick = (userId: string) => {
     setSelectedUser(null)
     try {
-      axios.post(`${API_URL}/apis/chat/markAgent/${userId}`, {}, 
+      axios.post(`${API_URL}/apis/chat/markAgent/${userId}`, {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -249,16 +251,16 @@ function Chat() {
         console.log("Initial users and agents:");
         console.log("usersToShow:", usersToShow);
         console.log("agentToShow:", agentToShow);
-  
+
         if (activeButton === "agents") {
           // Ensure you're accessing userId correctly (it might be inside data.userId)
-          const updatedAgents = agentToShow.filter(i => 
+          const updatedAgents = agentToShow.filter(i =>
             i.data && i.data.userId && i.data.userId._id !== userId
           );
           setAgnetToShow(updatedAgents); // Update the state with the new array
           console.log("Updated agent list:", updatedAgents);
         } else if (activeButton === "users") {
-          const updatedUsers = usersToShow.filter(i => 
+          const updatedUsers = usersToShow.filter(i =>
             i.data && i.data.userId && i.data.userId._id !== userId
           );
           setUsersToShow(updatedUsers); // Update the state with the new array
@@ -268,31 +270,31 @@ function Chat() {
     } catch (error) {
       console.error('Error marking chat:', error);
     }
-  
+
     console.log(isInterested);
     setIsInterested(!isInterested);
     const currentValue = !isInterested ? 'Interested' : 'Active Customers';
     console.log('Current value:', currentValue);
   };
-  
+
   // const router = useRouter();
 
   const productId = searchParams.get('productId');
   const userId = searchParams.get('userId'); // Extract userId/ const productId = searchParams.get('productId');
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
-    if(userId){
+    if (userId) {
 
     }
 
 
   }, [userId]);
 
-  useEffect(()=>{
+  useEffect(() => {
 
-    if(selectedUser){
+    if (selectedUser) {
       console.log(20);
     }
 
@@ -302,44 +304,44 @@ function Chat() {
   // const userId = searchParams.get('userId');
   useEffect(() => {
 
-    async function load(){
-      try{
+    console.log("Response data:dddddddddddddddddddddd",);
+    async function load() {
+      try {
         const resp = await getUserMessges();
         console.log("Logging agentId and productId:");
         console.log("userId:", userId);  // Should log the agentId
         console.log("productId:", productId);  // Should log the productId
-    
         if (userId && resp.data && !resp.data.data.length) {
-  
-            const resp = await sendMessage("Hello, who are you?", userId, null) as { status: boolean };
-            if(resp.status == true){
-              const users = await handleAllChat(page1,true) as UserType[];
-    
-              const agent = users.find((i: UserType) => 
-                  i.data && i.data.userId && i.data.userId._id === userId
-                );
-                if(agent){
-                        handleUserClick(agent,1,true)
-                      setSelectedUser({...agent});
-                }
+
+          const resp = await sendMessage("Hello, who are you?", userId, null) as { status: boolean };
+          if (resp.status == true) {
+            const users = await handleAllChat(page1, true) as UserType[];
+
+            const agent = users.find((i: UserType) =>
+              i.data && i.data.userId && i.data.userId._id === userId
+            );
+            if (agent) {
+              handleUserClick(agent, 1, true)
+              setSelectedUser({ ...agent });
             }
-          }else if(resp.data.data.length >= 1){
+          }
+        } else if (resp.data.data.length >= 1) {
 
-            const users = await handleAllChat(page1,true) as UserType[];
-    
-            const agent = users.find((i: UserType) => 
-                i.data && i.data.userId && i.data.userId._id === userId
-              );
+          const users = await handleAllChat(page1, true) as UserType[];
 
-            
-              if(agent){
-                      handleUserClick(agent,1,true)
-                    setSelectedUser({...agent});
-              }
-            
+          const agent = users.find((i: UserType) =>
+            i.data && i.data.userId && i.data.userId._id === userId
+          );
+
+
+          if (agent) {
+            handleUserClick(agent, 1, true)
+            setSelectedUser({ ...agent });
           }
 
-      }catch(e){
+        }
+
+      } catch (e) {
 
 
       }
@@ -357,7 +359,7 @@ function Chat() {
 
 
       // Add the received message to the userMessages state
-      setUserMessages((prevMessages) => [...prevMessages, receivedMessage]);
+      // setUserMessages((prevMessages) => [receivedMessage,...prevMessages, ]);
     });
 
     // Clean up the socket listener when the component unmounts
@@ -384,11 +386,11 @@ function Chat() {
         Authorization: `Bearer ${token}`, // Add your token here
       },
     }).then((resp) => {
-       // Log the user details from the response
+      // Log the user details from the response
 
       if (resp.data.status === 'ok') {
         setUser(resp.data.data);  // Update state with user data
-         
+
 
         // Log the _id from the response directly
       }
@@ -429,7 +431,7 @@ function Chat() {
           console.log("///......dddddddddsssss")
           console.log(resp.data.data)
           setAgnetToShow(resp.data.data)
-          
+
 
           // const sortedData = resp.data.data.sort((a: UserType, b: UserType) => {
           //   const timeA = new Date(a.data.updatedAt).getTime();
@@ -532,20 +534,20 @@ function Chat() {
 
   const [fileName, setFileName] = useState("");
 
-  const getUserMessges = ()=>{
+  const getUserMessges = () => {
     return axios
-    .get(`${API_URL}/apis/chat/getMarkUserChat?`, {
-      params: {
-        page: 1,
-        limit: 20,
-        // Use the extracted userId for the API call
-        userId: userId,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    
+      .get(`${API_URL}/apis/user/getAll?`, {
+        params: {
+          page: 1,
+          limit: 20,
+          // Use the extracted userId for the API call
+          userId: userId,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
   }
 
   const handleUserClick = (user: AgentType, page: number, reset: boolean) => {
@@ -555,9 +557,9 @@ function Chat() {
     // }
     // setpage3(1)
 
-     // The _id within userId
+    // The _id within userId
 
-    
+
 
     // Create a new object that keeps the structure of AgentType
     const newSelectedUser: AgentType = {
@@ -570,9 +572,9 @@ function Chat() {
     // Set the selected user with the full structure
     setSelectedUser(newSelectedUser);
     const userId = user._id; // Extract userId for API call
-    
+
     axios
-      .get(`${API_URL}/apis/chat/getMarkUserChat?`, {
+      .get(`${API_URL}/apis/chat/getUserChat`, {
         params: {
           page: page,
           limit: 20,
@@ -669,6 +671,17 @@ function Chat() {
       if (file) {
         const formData = new FormData();
         formData.append("doc", file); // Append the selected file if it exists
+        formData.append("fileName", file.name); // Append the file name
+        formData.append("userId", agentID); // Append the user ID
+        formData.append("productId", productId || ""); // Append the product ID if it exists
+        formData.append("message", messageToSend); // Append the message text
+        formData.append("sendBy", "Agent"); // Append the sender type
+        formData.append("type", file.type || ""); // Append the file type
+        formData.append("typeDate", new Date().toISOString()); // Append the current date
+        formData.append("status", "sent"); // Append the message status
+        formData.append("chatState", "active"); // Append the chat state
+        formData.append("seen", "false"); // Append the seen status
+        formData.append("agentId", user?._id || ""); // Append the agent ID
         axios.post(`${API_URL}/apis/chat/uploadDoc`, formData, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -764,9 +777,10 @@ function Chat() {
             // setAgent([...usersToShow]);
           }
         }
-        socket.emit('messageGet', data, (args: { success: boolean}) => {
-          c(args);
-        });
+        socket.emit('messageGet', data, (args: SocketCallBack) => {
+
+          c(args)
+        })
         console.log("message send successfull")
         // Update user messages immediately
         console.log(data);
@@ -786,16 +800,18 @@ function Chat() {
 
 
 
-  function isImage(path: string): boolean {
-    // Define common image extensions
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+  function isImage(path: string | undefined | null): boolean {
+        if (typeof path !== 'string') return false;
 
-    // Extract the file extension from the path
-    const extension = path.split('.').pop()?.toLowerCase(); // Get the extension and convert to lowercase
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
 
-    // Check if the extracted extension is in the list of image extensions
-    return imageExtensions.includes(extension || '');
-  }
+        const extension = path.split('.').pop()?.toLowerCase();
+
+        return imageExtensions.includes(extension || '');
+    }
+
+   
+
 
 
 
@@ -813,7 +829,7 @@ function Chat() {
   };
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) { // Check for Enter key without Shift
-                    scrollToBottom();
+      scrollToBottom();
 
       event.preventDefault(); // Prevent default behavior of Enter (e.g., new line)
       sendMessage(inputValue, selectedUser ? selectedUser._id : "", null); // Call your sendMessage function
@@ -851,7 +867,7 @@ function Chat() {
         messScrollContainer.current.removeEventListener('scroll', checkIfAtBottom);
       }
     };
-  }, [userMessages,selectedUser, isAtBottom]); // This will trigger every time `userMessages` or `isAtBottom` updates
+  }, [userMessages, selectedUser, isAtBottom]); // This will trigger every time `userMessages` or `isAtBottom` updates
 
   // When a new message is sent, force scrolling to the bottom
   useEffect(() => {
@@ -860,34 +876,38 @@ function Chat() {
 
 
 
-  const getFileIcon = (fileUrl: string) => {
-    const extension = fileUrl.split('.').pop()?.toLowerCase(); // Get file extension
+  const getFileIcon = (fileUrl: string | undefined | null) => {
+        if (typeof fileUrl !== 'string') {
+            return <i className="fa-solid fa-file text-gray-500"></i>; // Default icon
+        }
 
-    switch (extension) {
-      case 'pdf':
-        return <i className="fa-solid fa-file-pdf text-red-500"></i>;
+        const extension = fileUrl.split('.').pop()?.toLowerCase();
 
-      case 'xlsx':
-      case 'xls':
-        return <i className="fa-solid fa-file-excel text-green-500"></i>;
+        switch (extension) {
+            case 'pdf':
+                return <i className="fa-solid fa-file-pdf text-red-500"></i>;
 
-      case 'doc':
-      case 'docx':
-        return <i className="fa-solid fa-file-word text-blue-500"></i>;
+            case 'xlsx':
+            case 'xls':
+                return <i className="fa-solid fa-file-excel text-green-500"></i>;
 
-      case 'ppt':
-      case 'pptx':
-        return <i className="fa-solid fa-file-powerpoint text-orange-500"></i>;
+            case 'doc':
+            case 'docx':
+                return <i className="fa-solid fa-file-word text-blue-500"></i>;
 
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-        return <i className="fa-solid fa-file-image text-yellow-500"></i>;
+            case 'ppt':
+            case 'pptx':
+                return <i className="fa-solid fa-file-powerpoint text-orange-500"></i>;
 
-      default:
-        return <i className="fa-solid fa-file text-gray-500"></i>;
-    }
-  };
+            case 'png':
+            case 'jpg':
+            case 'jpeg':
+                return <i className="fa-solid fa-file-image text-yellow-500"></i>;
+
+            default:
+                return <i className="fa-solid fa-file text-gray-500"></i>;
+        }
+    };
 
 
 
@@ -925,7 +945,7 @@ function Chat() {
                 >
                   All Chat
                 </button>
-                <button
+                {/* <button
                   className={`${activeButton === 'users' ? "bg-red-600" : "bg-red-400"
                     } text-white px-4 py-2 rounded-lg mb-6`}
                   onClick={() => {
@@ -939,7 +959,7 @@ function Chat() {
                   }}
                 >
                   My customers
-                </button>
+                </button> */}
 
               </div>
 
@@ -950,8 +970,8 @@ function Chat() {
                   type="search"
                   placeholder="Search..."
                   className="text-[15px] font-[500] h-[43px] border px-[10px] sm:w-[200px] rounded-[10px] focus:outline focus:outline-[1px] focus:outline-[--red]"
-                // defaultValue={searchText}
-                onChange={(e) => handleSearchValue(e.target.value)}
+                  // defaultValue={searchText}
+                  onChange={(e) => handleSearchValue(e.target.value)}
                 />
                 <i className="fa-solid fa-magnifying-glass text-3xl ms-2"></i>
               </div>
@@ -968,8 +988,8 @@ function Chat() {
                     <div>
 
                       {agentToShow
-                        
-                        // .filter((user) => user.data.userId.username.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
+
+                        .filter((user) => user.username.toLowerCase().includes(searchText.toLowerCase()))
                         .map((user) => {
                           dispatch(setChatOpen(false))
                           // const messages = userMessages.filter(
@@ -987,7 +1007,7 @@ function Chat() {
                           return (
                             <div
                               key={user._id}
-                              className={ `items-center justify-between mb-4 cursor-pointer p-2 hover:bg-gray-100 rounded-lg w-full ${selectedUser?._id === user._id ? "bg-white" : ""}`}
+                              className={`items-center justify-between mb-4 cursor-pointer p-2 hover:bg-gray-100 rounded-lg w-full ${selectedUser?._id === user._id ? "bg-white" : ""}`}
                               onClick={() => handleUserClick(user, 1, true)}
                             >
                               <div className="flex relative">
@@ -1062,10 +1082,11 @@ function Chat() {
                           return (
                             <div
                               key={user._id}
-                              className={ (selectedUser && selectedUser._id == user._id ? "selected-user " : "")  + `items-center justify-between mb-4 cursor-pointer p-2 hover:bg-gray-100 rounded-lg w-full ${selectedUser?._id === user._id ? "bg-white" : ""}`}
+                              className={(selectedUser && selectedUser._id == user._id ? "selected-user " : "") + `items-center justify-between mb-4 cursor-pointer p-2 hover:bg-gray-100 rounded-lg w-full ${selectedUser?._id === user._id ? "bg-white" : ""}`}
                               onClick={() => {
-                                    //  scrollToBottom();
-                                handleUserClick(user, 1, true)}
+                                //  scrollToBottom();
+                                handleUserClick(user, 1, true)
+                              }
 
                               }
                             >
@@ -1149,7 +1170,7 @@ function Chat() {
                   {/* Toggle color based on 'isInterested' */}
                 </div>
                 <i
-                  onClick={() => handleTagClick(selectedUser.data.userId._id)}
+                  onClick={() => handleTagClick(selectedUser._id)}
 
                   className={`p-2 bg-gray-200 rounded-full hover:bg-gray-300 fa-${isInterested ? 'solid' : 'regular'} fa-bookmark ${isInterested ? 'text-red-500' : ''
                     }`}
@@ -1167,9 +1188,9 @@ function Chat() {
                       {/* <span className="font-bold ">{selectedUser._id}</span> */}
                       <span><b>{selectedUser?.username}</b></span>
                       {/* <p className="text-sm text-gray-400">Last seen: {userLastSeen[selectedUser._id]}</p> */}
-                      <p className="text-sm text-gray-400" style={{ fontSize: "11px" }}>
-                        Last seen: {selectedUser.lastSeen ? new Date(selectedUser.lastSeen).toLocaleString() : "Unavailable"}
-                      </p>
+                      {/* <p className="text-sm text-gray-400" style={{ fontSize: "11px" }}> */}
+                        {/* Last seen: {selectedUser.lastSeen ? new Date(selectedUser.lastSeen).toLocaleString() : "Unavailable"} */}
+                      {/* </p> */}
                     </div>
                     <span className="text-sm text-gray-400 ms-3">Local time: {new Date().toLocaleTimeString()}</span>
                   </div>
@@ -1178,13 +1199,7 @@ function Chat() {
                                         className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
                                     > */}
                   {/* Toggle color based on 'isInterested' */}
-                  <i
-                    onClick={() => handleTagClick(selectedUser._id)}
-                    // onClick={handleTagClick}
-
-                    className={`fa-${isInterested ? 'solid' : 'regular'} fa-bookmark ${isInterested ? 'text-red-500' : ''
-                      }`}
-                  ></i>
+              
                   {/* </button> */}
                 </div>
               )
@@ -1192,9 +1207,9 @@ function Chat() {
               {[...userMessages].reverse().map((msg, index) => {
 
                 const isCurrentUser = msg.sendBy === "Agent"; // Check if the message is sent by the user
-                const profileImage = isCurrentUser ? user?.profileImage : selectedUser?.data.userId.profileImage; // Display appropriate profile image
+                const profileImage = isCurrentUser ? user?.profileImage : selectedUser?.profileImage; // Display appropriate profile image
                 return (
-                  <div key={index} className="message mb-4 mt-2 flex items-start" 
+                  <div key={index} className="message mb-4 mt-2 flex items-start"
                   // onClick={() => handleReplyClick(msg)}
                   >
                     <img className="w-8 h-8 rounded-full mr-4" src={profileImage || ""} alt="Profile" />
@@ -1202,7 +1217,7 @@ function Chat() {
                       <div className="flex   ">
                         <p className="font-bold me-5">
                           {/* {isCurrentUser ? currentUser.name : selectedUser.name} */}
-                          <span className="text-sm text-gray-500">{isCurrentUser ? 'ME' : selectedUser?.data.userId.username}</span>
+                          <span className="text-sm text-gray-500">{isCurrentUser ? 'ME' : selectedUser?.username}</span>
                         </p>
                         <span className="me-3">
                           {new Date(msg.typeDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })},{" "}
@@ -1217,53 +1232,58 @@ function Chat() {
 
 
                       {msg.type === "text" && <p className="bg-gray-200 p-3 rounded-lg">{msg.message}</p>}
-                      {msg.type == "priceMessage" && <PricMessage data={{ amount: msg.amount, description: msg.description }} />}
-                      {msg.doc && (
-                        <div>
-                          {isImage(msg.doc) ? (
-                            // If it's an image, display the image
-                            <img 
-                            src={msg.doc} 
-                            className="w-2/3 max-w-xs h-auto object-cover mb-2" 
-                            alt="chat image"
-                          />
-                          
-                          ) : (
-                            // If it's not an image, display a file icon with the file name
-                            <div className="relative  flex items-center h-[100px] bg-gray-100 space-x-2 mb-2 w-full group p-2 rounded-lg transition-all duration-300 ease-in-out">
-                              {/* Icon with hover effect */}
-                              <div className="relative w-20 h-20 flex items-center justify-center">
-                                <span className="text-4xl">
+                      {msg.type == "priceMessage" &&
+                        <PricMessage data={{
+                          amount: msg?.paymentRequest?.amount !== undefined ? String(msg.paymentRequest.amount) : undefined,
+                          description: msg?.paymentRequest?.productDescription,
+                          customerId: msg.userId || "",
+                          accountId: msg.agentId || ""
+                        }} />}
 
-                                  {getFileIcon(msg.doc)} {/* Render appropriate icon */}
-                                </span>
-
-                                {/* Dark overlay on hover */}
-                                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-lg"></div>
-
-                                {/* Centered download icon on hover */}
-                                <a
-                                  href={msg.doc}
-                                  download={msg.doc}
-                                  target="_blank"
-                                  className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 text-6xl transition-transform duration-300 ease-in-out group-hover:scale-125"
-                                >
-                                  <i className="fa-solid  text-red-500 fa-download"></i>
-                                </a>
-                              </div>
-
-                              {/* File name */}
-                              <a
-                                href={msg.doc}
-                                download={msg.doc}
-                                className="text-gray-600 truncate block transition-colors duration-300 ease-in-out group-hover:text-blue-500 group-hover:underline"
-                              >
-                                {msg.doc.split('/').pop()}
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                     {msg.doc && (
+                                                        <div className="my-1 max-w-xs">
+                                                            {isImage(msg.doc) ? (
+                                                                <div className="inline-block rounded-xl overflow-hidden shadow-lg border border-gray-300 relative max-w-[280px] max-h-[320px]">
+                                                                    <img
+                                                                        src={msg.doc}
+                                                                        alt="chat image"
+                                                                        className="block w-full h-auto object-cover"
+                                                                        style={{ borderRadius: "12px" }}
+                                                                    />
+                                                                    {/* Optional: subtle hover zoom effect */}
+                                                                    <style jsx>{`
+          div:hover img {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+          }
+        `}</style>
+                                                                </div>
+                                                            ) : (
+                                                                // File display code unchanged
+                                                                <div className="relative flex items-center h-[100px] bg-gray-100 space-x-2 w-full group p-2 rounded-lg shadow-sm border border-gray-300">
+                                                                    <div className="relative w-20 h-20 flex items-center justify-center">
+                                                                        <span className="text-4xl">{getFileIcon(msg.doc)}</span>
+                                                                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-lg"></div>
+                                                                        <a
+                                                                            href={msg.doc}
+                                                                            download
+                                                                            target="_blank"
+                                                                            className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 text-4xl transition-transform duration-300 ease-in-out group-hover:scale-125"
+                                                                        >
+                                                                            <i className="fa-solid fa-download text-red-400"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                    <a
+                                                                        href={msg.doc}
+                                                                        download
+                                                                        className="text-gray-600 truncate block max-w-[150px] transition-colors duration-300 ease-in-out group-hover:text-blue-500 group-hover:underline"
+                                                                    >
+                                                                        {typeof msg.doc === "string" ? msg.doc.split("/").pop() : "File"}
+                                                                    </a>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
 
 
                       {msg.paymentRequest && (
@@ -1283,7 +1303,7 @@ function Chat() {
                           </p>
                           <div className="flex justify-end gap-5 mt-2">
                             <button onClick={() => handleViewQuote(msg)} className="px-3 py-1 rounded">View Quote</button>
-                            <button onClick={() => handlePayQuote(msg)} className="bg-red-600 text-white px-3 py-1 rounded">Pay Quote</button>
+                            {/* <button onClick={() => handlePayQuote(msg)} className="bg-red-600 text-white px-3 py-1 rounded">Pay Quote</button> */}
                           </div>
                         </div>
                       )}
@@ -1328,7 +1348,7 @@ sendMessage("______", selectedUser?.data.userId._id);
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Send a message"
-                  onKeyPress={e=>{
+                  onKeyPress={e => {
                     handleKeyPress(e)
 
                   }}
@@ -1342,17 +1362,17 @@ sendMessage("______", selectedUser?.data.userId._id);
 
                 {!isMobile ? (
                   <>
-                    <button
+                    {/* <button
                       onClick={toggleModal}
                       className="ml-2 text-white pr-4 pl-4 bg-red-600 px-4 pt-1 pb-1 rounded-lg"
                     >
                       +Get Paid
-                    </button>
+                    </button> */}
                     <input type="file" className="hidden " id="file-upload" onChange={handleFileChange} />
-                                <label htmlFor="file-upload" className="cursor-pointer bg-gray-100 px-4 py-2 rounded-lg mr-2 text-gray-600">
-                                    <i className="fa-solid fa-folder-plus"></i>
-                                    {/* {fileName && <span className="text-gray-600">{fileName}</span>} */}
-                                </label>
+                    <label htmlFor="file-upload" className="cursor-pointer bg-gray-100 px-4 py-2 rounded-lg mr-2 text-gray-600">
+                      <i className="fa-solid fa-folder-plus"></i>
+                      {/* {fileName && <span className="text-gray-600">{fileName}</span>} */}
+                    </label>
                   </>
                 ) : (
                   <div className="relative">
@@ -1376,8 +1396,8 @@ sendMessage("______", selectedUser?.data.userId._id);
                           <li className="px-3   hover:bg-gray-100  cursor-pointer">
                             <input type="file" className="hidden" id="file-upload" onChange={handleFileChange} />
                             <label htmlFor="file-upload" className="cursor-pointer bg-gray-200 px-4 py-2 rounded-lg mr-2 text-gray-600 flex items-center">
-                              <i className="fa-solid fa-folder-plus mr-2"></i>  
-                              Upload  
+                              <i className="fa-solid fa-folder-plus mr-2"></i>
+                              Upload
                             </label>
                           </li>
 
@@ -1472,12 +1492,12 @@ sendMessage("______", selectedUser?.data.userId._id);
                     <button
                       type="submit"
                       className="text-white bg-red-600 px-4 py-1 rounded-lg"
-                      // onClick={() => {
+                    // onClick={() => {
 
-                      //   let str = "Description:" + description + "___Price:" + price;
-                         
-                             
-                      // }}  // Trigger sendMessage on click
+                    //   let str = "Description:" + description + "___Price:" + price;
+
+
+                    // }}  // Trigger sendMessage on click
                     >
                       + Get Paid
                     </button>

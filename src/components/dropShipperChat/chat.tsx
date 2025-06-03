@@ -2,23 +2,23 @@
 import React, { useState, useEffect, useRef } from "react";
 // import "./chat.css"; // Ensure this path is correct based on your project structure
 import axios from "axios";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import io from 'socket.io-client';
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { RootState, store } from "@/store/store";
- 
+
 import Cookies from "js-cookie";
 import { setChatOpen, setKeForMessage } from "@/features/agentFeatures";
 import "./chat.css";
- 
+
 import LoadingScreen from "../LoadingScreen/LoadingScreen";
 
 
 const token = Cookies.get("access");
 // const token = process.env.NEXT_PUBLIC_JWT_TOKEN
 const API_URL = process.env.NEXT_PUBLIC_REACT_APP_BASEURL;
-const SOCKET_URL=process.env.NEXT_PUBLIC_SOCKET_BASEURL
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_BASEURL
 // 167.71.81.153:8000
 const socket = io(`${SOCKET_URL}/apis/user`, {
     'transports': ['websocket'],
@@ -34,8 +34,8 @@ const socket = io(`${SOCKET_URL}/apis/user`, {
 let userId: string | null = null;
 
 if (typeof window !== 'undefined') {
-  // We're on the client-side, it's safe to access localStorage
-  userId = localStorage.getItem("userId");
+    // We're on the client-side, it's safe to access localStorage
+    userId = localStorage.getItem("userId");
 }
 interface UserType {
     _id: string,
@@ -58,7 +58,7 @@ type AgentType = {
     unseen: number
 };
 type SocketCallBack = {
-   success: boolean
+    success: boolean
 };
 
 interface Item extends HTMLDivElement {
@@ -67,7 +67,7 @@ interface Item extends HTMLDivElement {
     scrollHeight: number;      // Number type for scrollHeight
     current: object;           // Use 'object' if 'current' is any non-null object
     onscroll: (event: Event) => void;  // Correctly type onscroll
-  }
+}
 
 
 interface UserData {
@@ -97,17 +97,17 @@ export interface Message {
     profileImage: string | undefined; // Change String to string (for consistency)
     replyToMessageId?: string | undefined;
 
-    paymentRequest?: {
-        amount: 150.00,
-        currency: "USD",
-        requestId: "req_123456",
-        productQuantity: 3, // Added productQuantity
-        productDescription: "Product A\nProduct B\nProduct C" // Added productDescription
-    },
+    paymentRequest?: PaymentRequestType | undefined; // Optional field for payment request
 }
 
 
-
+type PaymentRequestType = {
+    amount: string;
+    currency: string;
+    requestId: string;
+    productQuantity: number;
+    productDescription?: string;
+};
 
 export default function ReduxProvider() {
     return <Provider store={store}>
@@ -129,14 +129,14 @@ function Chat() {
     const [file, setFile] = useState<File | null>(null);
     // const [replyingTo, setReplyingTo] = useState<Message | null>(null);
     const [activeButton, setActiveButton] = useState('users');
-    
+
 
     const [AgentToShow, setAgentToShow] = useState<UserType[]>([]); // Default to UserType[]
     const [usersToShow, setAUsersToShow] = useState<UserType[]>([]); // Default to UserType[]
 
 
     const [userMessages, setUserMessages] = useState<Message[]>([]);
-    
+
     const searchParams = useSearchParams(); // Use the new hook to get search parameters
     const [loading, setLoading] = useState(true); // State for loading spinner
 
@@ -154,7 +154,7 @@ function Chat() {
 
     const activeAgentScroll = () => {
         const bottom = (activeAgentContainer.current?.scrollHeight || 0) === (activeAgentContainer.current?.scrollTop || 0) + (activeAgentContainer.current?.clientHeight || 0);
-       
+
         console.log(usersToShow);
 
         if (bottom) {
@@ -236,76 +236,81 @@ function Chat() {
     const messageKey = useSelector((store: RootState) => {
         return store.agentFeatures.keyForMessage;
     })
+     
+     
+    const hasSentRef = useRef(false);
+
+    //    const hasSentRef = useRef(false);
+
     useEffect(() => {
-        console.log("Logging agentId and productId:");
-        console.log("agentId:", agentId);
-        console.log("productId:", productId);
-        if (agentId && messageKey) {
-            sendMessage("Hello, who are you?", agentId).then((success) => {
-                if (success) {
+        const timeout = setTimeout(() => {
+            if (!agentId || !messageKey || hasSentRef.current) return;
 
-                              // agay api say user atta hato 
-                     axios.get(`${API_URL}/apis/chat/getAgentTab`,{
-                        params:{
-                            agentId:agentId
-                        },headers:{
-                    Authorization: `Bearer ${token}`
+            hasSentRef.current = true;
 
-                        }
-                     }).then(function(resp){
-                        console.log(resp.data)
-                        if(resp.data.data=="users"){
-                            setActiveButton("users");
-                            handleShowAllUsers(page2, true).then((users: UserType[]) => {
-                                const agent = users.find((user: UserType) => user._id === agentId); // Adjust based on your UserType structure
-                                setSeletedAgent(agent || null );   // on selete this the chat of that agent will open
-                            })
+            // STEP 1: First call the API to get dummy quotation data
+            // `${API_URL}/apis/quotation/create`,
+            axios
+                .get(`${API_URL}/apis/quotation/get/${agentId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                .then((res) => {
+                    const productList = res.data?.data; // Array of products
+                    console.log("Fetched product list from Quotation:", productList);
+                    const product = productList.find((item: any) => item.productId === productId);
+                    console.log(productId, "Product ID from search params");
+                    console.log("Selected product:", product);
+                    // STEP 2: Create paymentRequest — could use dummyData fields if needed
+                    const paymentRequest = {
+                        amount: product?.totalShippingDoorPrice || "0", // Default to 1000 if price is not available
+                        currency: "PKR",
+                        requestId: Date.now().toString(),
+                        productQuantity: product?.quantity || 1, // Default to 1 if quantity is not available
+                        // productDescription: `Premium leather watches\nAvailable in bulk\nDelivery in 7 days`,
+                        // You can include dummyData values here if needed
+                        // e.g., productDescription: dummyData?.description || default text
+                    };
 
-                        }else{
-                            setActiveButton("agents");
+                    // STEP 3: Send message with this data
+                    return sendMessage("", agentId, paymentRequest);
+                })
+                .then((success) => {
+                    if (!success) return;
 
-                                     handleShowAgents(1,true);
-                                     const agent = AgentToShow.find((user: UserType) => user._id === agentId); // Adjust based on your UserType structure
-                                     if(agent){
+                    // STEP 4: Load agent tab data
+                    return axios.get(`${API_URL}/apis/chat/getAgentTab`, {
+                        params: { agentId },
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                })
+                .then((resp) => {
+                    if (!resp) return;
 
-                                         setSeletedAgent(agent);
-                                     }
-                        }
-                     })
+                    // STEP 5: Determine tab and set agent
+                    if (resp.data.data === "users") {
+                        setActiveButton("users");
+                        handleShowAllUsers(page2, true).then((users: UserType[]) => {
+                            const agent = users.find((user) => user._id === agentId);
+                            setSeletedAgent(agent || null);
+                        });
+                    } else {
+                        setActiveButton("agents");
+                        handleShowAgents(1, true);
+                        const agent = AgentToShow.find((user) => user._id === agentId);
+                        if (agent) setSeletedAgent(agent);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error during quotation message flow:", error);
+                })
+                .finally(() => {
+                    dispatch(setKeForMessage(false));
+                });
+        }, 100);
 
-
-                   
-                }
-                dispatch(setKeForMessage(false));
-            });
-        }
+        return () => clearTimeout(timeout);
     }, [agentId, productId]);
 
-
-    useEffect(() => {
-        socket.on('messageSend', (receivedMessage: Message) => {
-            console.log("this is new recived message")
-            console.log(receivedMessage)
-            setUserMessages((prevMessages) => [...prevMessages, receivedMessage]);
-        });
-
-
-        return () => {
-            socket.off('messageSend');
-            const data = new FormData()
-
-            data.append("openChat", "");
-            axios.post(`${API_URL}/apis/user/update`, data, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                    // Authorization:"Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Zjk1M2M2MTlmN2I3YTU4NzIyYTkyMSIsImlhdCI6MTcyNzYxNTk0MiwiZXhwIjoxNzI3Nzg4NzQyfQ.ynQ1P6bMrwBjEZIvzT7FR1cqVWhgY4PsM5UyyHgnfDg"
-                }
-            }).then((resp) => {
-                console.log("ohohohohohohohohohohohohoh")
-                console.log(resp.data.data)
-            })
-        };
-    }, []);
     useEffect(() => {
         //     allChatAgent(page2, true);
         axios.get(`${API_URL}/apis/user/get`, {
@@ -351,31 +356,7 @@ function Chat() {
                 setAUsersToShow(agentsWithLastMessage)
 
 
-                // Extract the 'agent' field from each item in the array and map it to UserType
-                // const agents: UserType[] = agentsWithLastMessage.map((item: UserType) => ({
-                //     _id: item.agent._id, // Assuming agent has _id
-                //     username: item.agent.username, // Assuming agent has username
-                //     lastSeen: item.agent.lastSeen, // Assuming agent has lastSeen
-                //     profileImage: item.agent.profileImage, // Assuming agent has profileImage
-                //     lastMessage: item.lastMessage ? item.lastMessage : 'No message', // Get last message from item
-                //     // Convert lastMessageTime to Date object or fallback to a very old date
-                //     lastMessageTime: item.lastMessageTime ? new Date(item.lastMessageTime) : new Date(0),
-                //     unseen: item.unseen || 0,
-                // }));
-                // const sortedAgents = agents.sort((a, b) => {
-                //     return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
-                // });
-
-                // Set the sorted agents to `AgentToShow`
-                // if (reset) {
-                //     const fresh = [...sortedAgents];
-                //     setAUsersToShow(fresh);
-                //     c(sortedAgents)
-                // } else {
-                //     const fresh = [...usersToShow, ...sortedAgents];
-                //     setAUsersToShow(fresh);
-                //     c(fresh)
-                // }
+                 
 
             } catch (error) {
                 console.error('Error fetching all agents last chat:', error);
@@ -440,9 +421,7 @@ function Chat() {
         // setActiveButton('agents');
     }
 
-    // const handleShowAllUsers = async (page2:number,reset: boolean) => {
-    //     allChatAgent(page2, reset);
-    // };
+    
     const [fileName, setFileName] = useState("");
     const handleUserClick = (agent: AgentType, page: number, reset: boolean) => {
         // if (reset) {
@@ -471,15 +450,15 @@ function Chat() {
             setUserMessages(resp.data.data);
 
             setSeletedAgent(agent);
-            
+
             console.log("pppppppppppppppppp")
-             
+
             if (reset) {
                 setUserMessages([...resp.data.data])
             } else {
                 setUserMessages([...userMessages, ...resp.data.data])
             }
-            
+
         })
         const data = new FormData()
         data.append("openChat", agent._id);
@@ -492,16 +471,22 @@ function Chat() {
             console.log(resp.data.data)
         })
     };
-    function isImage(path: string): boolean {
-        // Define common image extensions
+    function isImage(path: string | undefined | null): boolean {
+        if (typeof path !== 'string') return false;
+
         const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-        // Extract the file extension from the path
-        const extension = path.split('.').pop()?.toLowerCase(); // Get the extension and convert to lowercase
-        // Check if the extracted extension is in the list of image extensions
+
+        const extension = path.split('.').pop()?.toLowerCase();
+
         return imageExtensions.includes(extension || '');
     }
-    const getFileIcon = (fileUrl: string) => {
-        const extension = fileUrl.split('.').pop()?.toLowerCase(); // Get file extension
+
+    const getFileIcon = (fileUrl: string | undefined | null) => {
+        if (typeof fileUrl !== 'string') {
+            return <i className="fa-solid fa-file text-gray-500"></i>; // Default icon
+        }
+
+        const extension = fileUrl.split('.').pop()?.toLowerCase();
 
         switch (extension) {
             case 'pdf':
@@ -528,6 +513,7 @@ function Chat() {
                 return <i className="fa-solid fa-file text-gray-500"></i>;
         }
     };
+
     function getLastSeenTime(lastSeen: string | Date): string {
         const now = new Date();
         const lastSeenDate = new Date(lastSeen);
@@ -539,35 +525,37 @@ function Chat() {
     }
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-          const selectedFile = e.target.files[0];
-          const fileType = selectedFile.type;
-    
-          // Determine the icon based on the file type
-          let icon;
-          if (fileType === 'application/pdf') {
-            icon = <i className="fa-solid fa-file-pdf text-red-500"></i>;
-          } else if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            icon = <i className="fa-solid fa-file-excel text-green-500"></i>;
-          } else if (fileType === 'application/msword' || fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            icon = <i className="fa-solid fa-file-word text-blue-500"></i>;
-          } else {
-            icon = <i className="fa-solid fa-file text-gray-500"></i>;
-          }
-    
-          setFile(selectedFile);
-          setFileName(selectedFile.name);
-          setFileIcon(icon); // Set the icon to display
+            const selectedFile = e.target.files[0];
+            const fileType = selectedFile.type;
+
+            // Determine the icon based on the file type
+            let icon;
+            if (fileType === 'application/pdf') {
+                icon = <i className="fa-solid fa-file-pdf text-red-500"></i>;
+            } else if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                icon = <i className="fa-solid fa-file-excel text-green-500"></i>;
+            } else if (fileType === 'application/msword' || fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                icon = <i className="fa-solid fa-file-word text-blue-500"></i>;
+            } else {
+                icon = <i className="fa-solid fa-file text-gray-500"></i>;
+            }
+
+            setFile(selectedFile);
+            setFileName(selectedFile.name);
+            setFileIcon(icon); // Set the icon to display
         }
-      };
+    };
     const handleCancel = () => {
         setFile(null);
         setFileName('');
         setFileIcon(null); // Clear the selected file information
     };
-    const sendMessage = (msg: string, agentID: string) => {
-
+    const sendMessage = (
+        msg: string,
+        agentID: string,
+        paymentRequest?: PaymentRequestType
+    ) => {
         return new Promise((c) => {
-
             let messageStr;
 
             if (msg !== "________") {
@@ -576,113 +564,72 @@ function Chat() {
                 messageStr = inputValue.trim();
             }
 
-            if (!messageStr && !file) {
-                return; // Don't send if both input and file are empty
+            if (!messageStr && !file && !paymentRequest) {
+                return; // Don't send if all are empty
             }
 
             const messageToSend = messageStr;
-            let docUrl
-            // Add file to formData if it exists
-            if (file) {
-                const formData = new FormData();
-                formData.append("doc", file); // Append the selected file if it exists
-                axios.post(`${API_URL}/apis/chat/uploadDoc`, formData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                        // Authorization:"Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2Zjk1M2M2MTlmN2I3YTU4NzIyYTkyMSIsImlhdCI6MTcyNzYxNTk0MiwiZXhwIjoxNzI3Nzg4NzQyfQ.ynQ1P6bMrwBjEZIvzT7FR1cqVWhgY4PsM5UyyHgnfDg"
-                    }
-                }).then(function (resp) {
-                    console.log(resp.data.data);
-                    docUrl = resp.data.data
-                    emitMessage(docUrl)
+            let docUrl = "";
 
-                })
-
-            } else {
-                emitMessage("")
-            }
-
-            // Create the new message object to add immediately to the chat
-
-            function emitMessage(docUrl: string) {
-
-
-
-
-                const data = {
-                    agentId: agentID || "",   // the ID of the recipient (agent ID)
-                    userId: user?._id,           // the ID of the sender (user ID)
+            const emitMessage = (docUrl: string) => {
+                const data: any = {
+                    agentId: agentID || "",
+                    userId: user?._id,
                     productId: productId,
                     message: messageToSend,
                     typeDate: new Date().toISOString(),
-                    type: file ? "file" : "text", // Determine type based on file presence
+                    type: paymentRequest ? "priceMessage" : file ? "file" : "text",
                     status: "sent",
                     chatState: "active",
                     sendBy: "User",
                     seen: false,
-                    doc: docUrl,  // Store the actual File object, not the file name
+                    doc: docUrl,
                     profileImage: user?.profileImage,
+                };
+
+                if (paymentRequest) {
+                    data.paymentRequest = paymentRequest;
                 }
 
-                const index = AgentToShow.findIndex((user: UserType) => user._id === SeletedAgent?._id);
-                if (index > -1) {
-                    // Remove the user from the list
-                    const tempUser = AgentToShow[index];
-                    AgentToShow.splice(index, 1);
-                    // Add the user to the top of the list
-                    AgentToShow.unshift(tempUser);
-                    // Update the agent and users list to reflect the change
-                    setAgentToShow([...AgentToShow]);
-                    // setAgent([...AgentToShow]);
-                }
-
-                // Emit the message with the file and text using Socket.io
-
-                socket.emit('messageGet', data, (args: SocketCallBack) => {
-
-                    c(args)
+                socket.emit("messageGet", data, (args: SocketCallBack) => {
+                    c(args);
                 });
 
-                if (activeButton == "users") {
-
-                    const currentUser = usersToShow.find(i => i._id == SeletedAgent?._id);
-
-                    if (currentUser) {
-                        currentUser.lastMessageTime = new Date();
-                    }
-                    const sortedAgents = usersToShow.sort((a, b) => {
-                        return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
-                    });
-                    setAUsersToShow([...sortedAgents]);
-                } else if (activeButton == "agents") {
-                    const currentUser = AgentToShow.find(i => i._id == SeletedAgent?._id);
-                    if (currentUser) {
-                        currentUser.lastMessageTime = new Date();
-                    }
-                    const sortedAgents = AgentToShow.sort((a, b) => {
-                        return b.lastMessageTime.getTime() - a.lastMessageTime.getTime();
-                    });
-
-                    setAgentToShow([...sortedAgents])
-                }
-                console.log("message send successfull")
-
-                // Update user messages immediately
-                console.log(data);
-                // setUserMessages((prevMessages) => [...prevMessages, data]);
-
-                setUserMessages((prevMessages) => [data, ...prevMessages])
-
-                // Clear input and reset states
+                setUserMessages((prevMessages) => [...prevMessages, data]);
                 setInputValue("");
                 setFile(null);
                 setFileName("");
-                // setReplyingTo(null);
+            };
+
+            if (file) {
+                const formData = new FormData();
+                formData.append("doc", file);
+                formData.append("userId", user?._id || "");
+                formData.append("agentId", agentID || "");
+                formData.append("productId", productId || "");
+                formData.append("message", messageToSend);
+                formData.append("profileImage", user?.profileImage || "");
+                formData.append("sendBy", "User");
+                formData.append("type", paymentRequest ? "priceMessage" : "file");
+                formData.append("typeDate", new Date().toISOString());
+
+                if (paymentRequest) {
+                    formData.append("paymentRequest", JSON.stringify(paymentRequest));
+                }
+                axios
+                    .post(`${API_URL}/apis/chat/uploadDoc`, formData, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                    .then(function (resp) {
+                        docUrl = resp.data.data;
+                        emitMessage(docUrl);
+                    });
+            } else {
+                emitMessage("");
             }
-
-        })
-
-
+        });
     };
 
 
@@ -694,9 +641,15 @@ function Chat() {
     const handleViewQuote = (message: Message) => {
         alert(`Quote Details: ${message.paymentRequest?.productDescription}`);
     };
+    const router = useRouter();
+
     const handlePayQuote = (message: Message) => {
-        alert(`Processing payment of $${message.paymentRequest?.amount}`);
-        // setReplyingTo(null);
+        const amount = message.paymentRequest?.amount;
+        if (amount) {
+            router.push(`/payment?amount=${amount}`);
+        } else {
+            alert("No amount found for this quote.");
+        }
     };
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && !event.shiftKey) { // Check for Enter key without Shift
@@ -741,18 +694,16 @@ function Chat() {
                 messScrollContainer.current.removeEventListener('scroll', checkIfAtBottom);
             }
         };
-    }, [userMessages,SeletedAgent, isAtBottom]); // This will trigger every time `userMessages` or `isAtBottom` updates
+    }, [userMessages, SeletedAgent, isAtBottom]); // This will trigger every time `userMessages` or `isAtBottom` updates
 
     // When a new message is sent, force scrolling to the bottom
     useEffect(() => {
-        
+
         // scrollToBottom();
 
     }, [userMessages.length]); // Triguger when a new message is added (or length changes)
 
-    // Define the type for userMessages
-    // const userMessagess: { [key: string]: Message[] } = {}; // or initialize it with actual values if available
-
+     
 
 
     return (
@@ -765,7 +716,7 @@ function Chat() {
                         <div className="sticky top-0 bg-gray-100 ">
                             <h1 className="text-5xl font-bold mb-2">Chat</h1>
                             <span className="text-gray-500 mb-2">Get more information about your quotes</span>
-                            <button
+                            {/* <button
                                 className={`${activeButton === 'agents' ? "bg-red-600" : "bg-red-400"
                                     } text-white px-4 me-3 mt-3 py-2 rounded-lg mb-4`}
                                 onClick={() => {
@@ -779,10 +730,10 @@ function Chat() {
                                 }}
                             >
                                 Agents I am working with
-                            </button>
+                            </button> */}
                             <button
                                 className={`${activeButton === 'users' ? "bg-red-600" : "bg-red-400"
-                                    } text-white px-4 py-2 rounded-lg mb-6`}
+                                    } text-white px-4 py-2 block rounded-lg mb-6`}
                                 onClick={() => {
                                     setpage1(1);
                                     setpage2(1);
@@ -793,7 +744,7 @@ function Chat() {
                                     setActiveButton('users');
                                 }}
                             >
-                                All chats
+                                All chats  with Agents
                             </button>
                             <div className="search mb-4 sm:flex sm:items-center align-middle" >
                                 <h2 className="text-2xl mt-2 items-center  "><b>Messages</b></h2>
@@ -815,7 +766,7 @@ function Chat() {
                                     ) : <div className="new-container">
                                         {
                                             AgentToShow
-                                                .filter((user) => user.username && user.username.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
+                                                .filter((user) => user.username && user.username.toLowerCase().includes(searchText.toLowerCase()))
                                                 .map((user) => {
                                                     dispatch(setChatOpen(false));
                                                     // Filter messages for the current user
@@ -831,11 +782,12 @@ function Chat() {
                                                             key={user._id}
                                                             className={`items-center justify-between mb-4 cursor-pointer p-2 hover:bg-gray-100 rounded-lg w-full ${SeletedAgent?._id === user._id ? "bg-gray-200" : ""
                                                                 }`}
-                                                                
-                                                            onClick={() =>{
-                                                                 setpage3(1)
-                                                                 setUserMessages([])
-                                                                handleUserClick(user, 1, true)}
+
+                                                            onClick={() => {
+                                                                setpage3(1)
+                                                                setUserMessages([])
+                                                                handleUserClick(user, 1, true)
+                                                            }
                                                             }
                                                         >
                                                             <div className="flex relative">
@@ -849,7 +801,7 @@ function Chat() {
                                                                         <div className="flex pb-3 justify-between items-center">
                                                                             <h2 className="text-lg font-bold">{user.username}</h2>
                                                                             <div className="text-xs ms-2">
-                                                                                Minimum Daily Order Requirement: {}
+                                                                                {/* Minimum Daily Order Requirement: { } */}
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex justify-between">
@@ -908,18 +860,18 @@ function Chat() {
                                                 const unreadCount = messages.filter(
                                                     (message) => !message.seen && message.sendBy !== "User" // Only count messages not sent by this user
                                                 ).length;
-                             
+
                                                 return (
                                                     <div
                                                         key={user._id}
                                                         className={`items-center justify-between mb-4 cursor-pointer p-2 hover:bg-gray-100 rounded-lg w-full ${SeletedAgent?._id === user._id ? "bg-gray-200" : ""
                                                             }`}
-                                                        onClick={() =>
-                                                            {
-                                                                 setpage3(1)
-                                                                 setUserMessages([])
-                                                                handleUserClick(user, 1, true)}
-                                                            }
+                                                        onClick={() => {
+                                                            setpage3(1)
+                                                            setUserMessages([])
+                                                            handleUserClick(user, 1, true)
+                                                        }
+                                                        }
                                                     >
                                                         <div className="flex relative">
                                                             <img
@@ -932,7 +884,7 @@ function Chat() {
                                                                     <div className="flex pb-3 justify-between items-center">
                                                                         <h2 className="text-lg font-bold">{user.username}</h2>
                                                                         <div className="text-xs ms-2">
-                                                                            Minimum Daily Order Requirement: { }
+                                                                            {/* Minimum Daily Order Requirement: { } */}
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex justify-between">
@@ -941,18 +893,18 @@ function Chat() {
                                                                             <>
                                                                                 <p className="text-sm">
                                                                                     {
-                                                                                        user.lastMessage ? user.lastMessage.length > 20 ? `${user.lastMessage.slice(0, 20)}...` : user.lastMessage : "No messages yet..."
+                                                                                        // user.lastMessage ? user.lastMessage.length > 20 ? `${user.lastMessage.slice(0, 20)}...` : user.lastMessage : "No messages yet..."
                                                                                     }
                                                                                     {/* {user.lastMessage.split(" ").slice(0, 3).join(" ")}
                                                                                     {user.lastMessage.split(" ").length > 3 ? "..." : ""} */}
                                                                                 </p>
                                                                             </>
                                                                         ) : (
-                                                                            <p className="text-sm text-gray-500">No messages yet.</p>
+                                                                            <p className="text-sm text-gray-500"> </p>
                                                                         )}
                                                                         {/* Show Last Seen */}
                                                                         <span className="text-sm text-gray-500">
-                                                                            {getLastSeenTime(user.lastMessageTime)}
+                                                                            {/* {getLastSeenTime(user.lastMessageTime)} */}
                                                                         </span>
                                                                     </div>
                                                                     {/* Unread Message Count */}
@@ -983,27 +935,27 @@ function Chat() {
                             <div className="flex items-center justify-between p-2 bg-gray-200 border-b">
                                 <div className="flex justify-start items-center">
 
-                              
-                                <button
-                                    className="mr-2 p-2 rounded-full "
-                                    onClick={() => setSeletedAgent(null)}
-                                    aria-label="Back"
-                                >
-                                    <i className="fa-solid fa-arrow-left text-lg"></i>
-                                </button>
 
-                                <img
-                                    className="w-10 h-10 rounded-full mr-2"
+                                    <button
+                                        className="mr-2 p-2 rounded-full "
+                                        onClick={() => setSeletedAgent(null)}
+                                        aria-label="Back"
+                                    >
+                                        <i className="fa-solid fa-arrow-left text-lg"></i>
+                                    </button>
 
-                                    src={SeletedAgent.profileImage}
-                                    alt={`${SeletedAgent} avatar`}
-                                />
-                                <div>
-                                    <span className="font-bold text-lg">{SeletedAgent.username}</span>
-                                    <p className="text-sm text-gray-400" style={{ fontSize: "11px" }}>
-                                        Last seen: {SeletedAgent.lastSeen ? new Date(SeletedAgent.lastSeen).toLocaleString() : "Unavailable"}
-                                    </p>
-                                </div>
+                                    <img
+                                        className="w-10 h-10 rounded-full mr-2"
+
+                                        src={SeletedAgent.profileImage}
+                                        alt={`${SeletedAgent} avatar`}
+                                    />
+                                    <div>
+                                        <span className="font-bold text-lg">{SeletedAgent.username}</span>
+                                        <p className="text-sm text-gray-400" style={{ fontSize: "11px" }}>
+                                            {/* Last seen: {SeletedAgent.lastSeen ? new Date(SeletedAgent.lastSeen).toLocaleString() : "Unavailable"} */}
+                                        </p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => handleTagClick(SeletedAgent._id)}
@@ -1030,44 +982,30 @@ function Chat() {
                                             <span><b>{SeletedAgent.username}</b></span>
                                             {/* <p className="text-sm text-gray-400">Last seen: {userLastSeen[SeletedAgent._id]}</p> */}
                                             <p className="text-sm text-gray-400" style={{ fontSize: "11px" }}>
-                                                Last seen: {SeletedAgent.lastSeen ? new Date(SeletedAgent.lastSeen).toLocaleString() : "Unavailable"}
+                                                {/* Last seen: {SeletedAgent.lastSeen ? new Date(SeletedAgent.lastSeen).toLocaleString() : "Unavailable"} */}
                                             </p>
 
                                         </div>
                                         <span className="text-sm text-gray-400 ms-3">Local time: {new Date().toLocaleTimeString()}</span>
                                     </div>
-                                    {/* <button
-                                        // onClick={handleTagClick}
-                                        className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
-                                    > */}
-                                    {/* Toggle color based on 'isInterested' */}
-                                    <i
-                                        onClick={() => handleTagClick(SeletedAgent._id)}
-                                        // onClick={handleTagClick}
-
-                                        className={`fa-${isInterested ? 'solid' : 'regular'} fa-bookmark ${isInterested ? 'text-red-500' : ''
-                                            }`}
-                                    ></i>
-                                    {/* </button> */}
+                                   
                                 </div>
                             )
                             }
                             {
                                 loading ? (
-                                    // Display loading spinner
-                                    // <div className="flex b justify-center items-center">
-                                    //   <LoadingSpinner />
+                                  
                                     <LoadingScreen></LoadingScreen>
                                     // </div>
                                 ) :
 
-                                    [...userMessages].reverse().map((msg, index) => {
+                                    [...userMessages].map((msg, index) => {
                                         const isCurrentUser = msg.sendBy === "User"; // Check if the message is sent by the user
                                         const profileImage = isCurrentUser ? user?.profileImage : SeletedAgent?.profileImage; // Display appropriate profile image
                                         return (
                                             <div className="message mb-4 mt-2 flex items-start"
-                                            //  onClick={() => handleReplyClick(msg)} 
-                                             key={index}>
+                                                //  onClick={() => handleReplyClick(msg)} 
+                                                key={index}>
                                                 <img className="w-8 h-8 rounded-full mr-4" src={profileImage || ""} alt="Profile" />
                                                 <div>
                                                     <div className="flex">
@@ -1084,53 +1022,61 @@ function Chat() {
                                                     {/* Display the message content */}
                                                     {
                                                         msg.message &&
-                                                    <p className="bg-gray-200  p-3 rounded-lg">{msg.message}</p>
+                                                        <p className="bg-gray-200  p-3 rounded-lg">{msg.message}</p>
                                                     }
 
                                                     {/* Display the attached document, if available */}
+
                                                     {msg.doc && (
-                                                        <div>
+                                                        <div className="my-1 max-w-xs">
                                                             {isImage(msg.doc) ? (
-                                                                // If it's an image, display the image
-                                                                <img 
-                                                                src={msg.doc} 
-                                                                className="w-full max-w-xs h-auto object-cover mb-2" 
-                                                                alt="chat image"
-                                                              />
-                                                              
+                                                                <div className="inline-block rounded-xl overflow-hidden shadow-lg border border-gray-300 relative max-w-[280px] max-h-[320px]">
+                                                                    <img
+                                                                        src={msg.doc}
+                                                                        alt="chat image"
+                                                                        className="block w-full h-auto object-cover"
+                                                                        style={{ borderRadius: "12px" }}
+                                                                    />
+                                                                    {/* Optional: subtle hover zoom effect */}
+                                                                    <style jsx>{`
+          div:hover img {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+          }
+        `}</style>
+                                                                </div>
                                                             ) : (
-                                                                // If it's not an image, display a file icon with the file name
-                                                                <div className="relative  flex items-center h-[100px] bg-gray-200 space-x-2 mb-2 w-full group p-2 rounded-lg transition-all duration-300 ease-in-out">
-                                                                    {/* Icon with hover effect */}
+                                                                // File display code unchanged
+                                                                <div className="relative flex items-center h-[100px] bg-gray-100 space-x-2 w-full group p-2 rounded-lg shadow-sm border border-gray-300">
                                                                     <div className="relative w-20 h-20 flex items-center justify-center">
-                                                                        <span className="text-4xl">
-                                                                            {getFileIcon(msg.doc)} {/* Render appropriate icon */}
-                                                                        </span>
-
-                                                                        {/* Dark overlay on hover */}
+                                                                        <span className="text-4xl">{getFileIcon(msg.doc)}</span>
                                                                         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-lg"></div>
-
-                                                                        {/* Centered download icon on hover */}
                                                                         <a
                                                                             href={msg.doc}
-                                                                            download={msg.doc}
-                                                                            target="_blank" 
-                                                                            className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 text-6xl transition-transform duration-300 ease-in-out group-hover:scale-125"
+                                                                            download
+                                                                            target="_blank"
+                                                                            className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 text-4xl transition-transform duration-300 ease-in-out group-hover:scale-125"
                                                                         >
-                                                                            <i className="fa-solid  text-red-400 fa-download"></i>
+                                                                            <i className="fa-solid fa-download text-red-400"></i>
                                                                         </a>
                                                                     </div>
                                                                     <a
                                                                         href={msg.doc}
-                                                                        download={msg.doc}
-                                                                        className="text-gray-600 truncate block transition-colors duration-300 ease-in-out group-hover:text-blue-500 group-hover:underline"
+                                                                        download
+                                                                        className="text-gray-600 truncate block max-w-[150px] transition-colors duration-300 ease-in-out group-hover:text-blue-500 group-hover:underline"
                                                                     >
-                                                                        {msg.doc.split('/').pop()}
+                                                                        {typeof msg.doc === "string" ? msg.doc.split("/").pop() : "File"}
                                                                     </a>
                                                                 </div>
                                                             )}
                                                         </div>
                                                     )}
+
+
+
+
+
+
 
 
                                                     {/* Display the payment request, if available */}

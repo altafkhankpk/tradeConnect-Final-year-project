@@ -260,9 +260,9 @@ const WorkingOn = () => {
                       <th scope="col" className="text-sm  font-bold px-6 py-4">
                         Upload a Quote
                       </th>
-                      <th scope="col" className="text-sm  font-bold px-6 py-4">
+                      {/* <th scope="col" className="text-sm  font-bold px-6 py-4">
                         DM
-                      </th>
+                      </th> */}
                       <th
                         scope="col"
                         className="text-sm  font-bold px-6 py-4"
@@ -324,7 +324,7 @@ const WorkingOn = () => {
                             </button>
                           </td>
                           <td className="font-[400] text-[14px]">
-                          <button
+                          {/* <button
                               className="h-[30px] bg-[#D71A21] w-[max-content] mx-auto text-white font-[400] rounded-[10px] flex justify-center items-center px-[13px]"
                               onClick={() => {
                                 dispatch(setKeForMessage(true))
@@ -332,7 +332,7 @@ const WorkingOn = () => {
                               }}
                             >
                               Reach Out
-                            </button>
+                            </button> */}
                           </td>
                           <td className="align-middle text-sm text-center font-normal px-6 py-1.5">
                             <div className="flex flex-col gap-1">

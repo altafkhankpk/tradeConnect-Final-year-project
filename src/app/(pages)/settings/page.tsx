@@ -82,6 +82,37 @@ const Settings = () => {
       });
     }
   };
+
+  const fn_deleteAccount = async () => {
+    try {
+      const token = Cookies.get("access");// or however you're storing the JWT
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_REACT_APP_BASEURL}/apis/user/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Add JWT token to the header
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Account deleted successfully.");
+        // Optionally, log the user out and redirect
+        localStorage.removeItem("token");
+        Cookies.remove("access");
+        Cookies.remove("refresh");
+        window.location.href = "/login"; // or navigate using react-router
+      } else {
+        toast.error(`Failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error("An error occurred while deleting the account.");
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -158,8 +189,8 @@ const Settings = () => {
                               previewImage
                                 ? previewImage
                                 : initailData.profileImage
-                                ? initailData.profileImage
-                                : AvatarImg
+                                  ? initailData.profileImage
+                                  : AvatarImg
                             }
                             width={112}
                             height={112}
@@ -339,7 +370,14 @@ const Settings = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-6">
+
+              <div className="flex justify-between mt-6">
+                <button
+                  onClick={fn_deleteAccount}
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md"
+                >
+                  Delete Account
+                </button>
                 <button
                   onClick={handleSubmit}
                   className="bg-[--red] text-white px-6 py-2 rounded-md"
@@ -369,11 +407,10 @@ const Settings = () => {
               <div className="bg-white md:relative min-h-[100%] rounded-[35px] px-[25px] pt-[40px] pb-[80px] md:p-[40px]">
                 <div className=" flex gap-12 h-full">
                   <div
-                    className={`transition-all duration-700 z-[9999] min-h-[100vh] md:min-h-[auto] left-0 top-0 w-[200px] md:w-[25%] fixed md:static bg-white shadow-sm md:shadow-none px-[10px] md:px-0 py-[30px] md:py-0 border-e md:border-none border-[--red] ${
-                      viewMobileBar
+                    className={`transition-all duration-700 z-[9999] min-h-[100vh] md:min-h-[auto] left-0 top-0 w-[200px] md:w-[25%] fixed md:static bg-white shadow-sm md:shadow-none px-[10px] md:px-0 py-[30px] md:py-0 border-e md:border-none border-[--red] ${viewMobileBar
                         ? "left-0 md:left-auto"
                         : "left-[-100%] md:left-auto"
-                    }`}
+                      }`}
                   >
                     <p className="text-[25px] sm:text-[43px] font-[800]">
                       <i>Settings</i>
@@ -385,33 +422,30 @@ const Settings = () => {
                       <div className="flex flex-col gap-4 mt-[20px]">
                         <button
                           onClick={() => setActiveTab("profile")}
-                          className={`px-5 h-[45px]  flex items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${
-                            activeTab === "profile"
+                          className={`px-5 h-[45px]  flex items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${activeTab === "profile"
                               ? "bg-[#F3F3F3] text-[--red] border-l-4 border-[--red]"
                               : "text-black"
-                          }`}
+                            }`}
                         >
                           <p>Profile</p>
                         </button>
 
-                        <button
+                        {/* <button
                           onClick={() => setActiveTab("invoices")}
-                          className={`px-5 h-[45px]  flex items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${
-                            activeTab === "invoices"
+                          className={`px-5 h-[45px]  flex items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${activeTab === "invoices"
                               ? "bg-[#F3F3F3] text-[--red] border-l-4 border-[--red]"
                               : "text-black"
-                          }`}
+                            }`}
                         >
-                          <p>Invoices</p>
-                        </button>
+                          {/* <p>Invoices</p> */}
+                        {/* </button> */} 
 
                         <button
                           onClick={() => setActiveTab("bank")}
-                          className={`px-5 h-[45px]  flex text-left items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${
-                            activeTab === "bank"
+                          className={`px-5 h-[45px]  flex text-left items-center gap-[10px] text-[16px] sm:text-[18px] font-[700] ${activeTab === "bank"
                               ? "bg-[#F3F3F3] text-[--red] border-l-4 border-[--red]"
                               : "text-black"
-                          }`}
+                            }`}
                         >
                           <p>Payment Methods</p>
                         </button>
@@ -432,9 +466,8 @@ const Settings = () => {
                       onClick={() => setViewMobileBar(!viewMobileBar)}
                     >
                       <MdKeyboardDoubleArrowRight
-                        className={`text-[24px] ${
-                          viewMobileBar ? "rotate-180" : ""
-                        } transition-all duration-300`}
+                        className={`text-[24px] ${viewMobileBar ? "rotate-180" : ""
+                          } transition-all duration-300`}
                       />
                     </div>
                     {renderTabContent()}

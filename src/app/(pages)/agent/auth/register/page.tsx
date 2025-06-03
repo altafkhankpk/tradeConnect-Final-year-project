@@ -206,11 +206,7 @@ const Register = () => {
       <div className="flex flex-col lg:flex-row px-[20px] py-[30px] gap-[50px] lg:gap-[15px] max-w-[1400px]">
         {/* left-box */}
         <div className="flex-1 xl:ps-[30px] lg:border-r pe-[20px] flex flex-col items-center lg:items-start">
-          <Image
-            alt="logo"
-            src={logon}
-            className="h-[95px] object-contain w-[max-content]"
-          />
+          {/*   */}
           <p className="text-[30px] sm:text-[40px] font-[600] leading-[35px] sm:leading-[50px] max-w-[500px] mt-[15px] text-center lg:text-start">
             Get better prices for free and{" "}
             <i className="font-[800]">scale your business</i>
@@ -305,11 +301,11 @@ const Register = () => {
                 {Formik.errors.phone}
               </p>
             )}
-            <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
+            {/* <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
               <p className="text-gray-300">Or continue with</p>
               <hr className="flex-1 mt-[2px]" />
-            </div>
-            <div className="flex gap-[13px] items-center">
+            </div> */}
+            {/* <div className="flex gap-[13px] items-center">
               <Image
                 alt="google"
                 src={google}
@@ -317,7 +313,7 @@ const Register = () => {
                 className="h-[50px] object-contain cursor-pointer w-[max-content]"
               />
               {googleLoader ? <span className="loadergoogle"></span> : null}
-            </div>
+            </div> */}
             <div className="flex sm:min-w-[500px] sm:max-w-[530px] mt-[10px]">
               <button
                 type="submit"
