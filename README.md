@@ -2,7 +2,8 @@
 # 🚀 TradeConnect
 > **A next-generation platform bridging Agents and Dropshippers with real-time collaboration, secure payments, and seamless product management.**
 
-![TradeConnect Banner](https://via.placeholder.com/1200x400?text=TradeConnect+Platform)
+![TradeConnect Banner](public/tradeConnect-logo.png)
+
 
 ---
 
