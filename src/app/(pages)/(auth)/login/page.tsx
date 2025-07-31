@@ -224,35 +224,14 @@ const Login = () => {
               </p>
             )}
             <p className="text-[13px] text-[#5C5C5C] mt-[-20px] w-full text-end sm:min-w-[500px] max-w-[450px] cursor-pointer">
-              {/* <Link href={"/forget-password"} className="hover:underline">
-                Forgot your password?
-              </Link> */}
             </p>
-            {/* <div className="sm:min-w-[500px] sm:max-w-[530px] flex gap-[10px] items-center">
-              <p className="text-gray-300">Or continue with</p>
-              <hr className="flex-1 mt-[2px]" />
-            </div> */}
-            {/* <div className="flex gap-[13px] items-center">
-              <div
-                onClick={handleGoogleSignin}
-                className="h-[50px] flex px-4  gap-2 border rounded-2xl items-center cursor-pointer"
-              >
-                <div>
-                  <Image alt="google" src={google} width={25} height={25} />
-                </div>
-                <span className=" text-black text-sm">Google</span>
-
-                {googleLoader ? <span className="loadergoogle"></span> : null}
-              </div>
-            </div> */}
             <div className="flex sm:min-w-[500px] sm:max-w-[530px]">
               <button
                 type="submit"
-                className={`h-[65px] flex justify-center items-center flex-1 text-white font-[600] text-[17px] rounded-[10px] ${
-                  loader
+                className={`h-[65px] flex justify-center items-center flex-1 text-white font-[600] text-[17px] rounded-[10px] ${loader
                     ? "cursor-not-allowed bg-[--red-disabled]"
                     : "bg-[--red]"
-                }`}
+                  }`}
               >
                 {!loader ? (
                   <span>Login</span>
